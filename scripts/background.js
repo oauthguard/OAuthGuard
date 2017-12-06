@@ -40,33 +40,37 @@ chrome.webRequest.onBeforeRequest.addListener(
                             oauth2Response.referer = referer;
                             console.log(oauth2Response);
                             var oauth2Request = localStorage.getItem(oauth2Response.RPDomain);
-                            if(oauth2Request){
+                            if (oauth2Request) {
                                 oauth2Request = JSON.parse(oauth2Request).request;
                                 var threats = detectOAuth2Threats(oauth2Request, oauth2Response);
                                 printThreats(threats);
-                                if (threats.thirdPartyTokenLeaks){
+                                if (threats.thirdPartyTokenLeaks) {
                                     blocking = true;
                                 }
-                                if (threats.CSRFAttack){
+                                if (threats.CSRFAttack) {
                                     blocking = true;
                                 }
-                            }else{
+                            } else {
                                 var threats = detectOAuth2Threats(null, oauth2Response);
                                 printThreats(threats);
-                                if (threats.thirdPartyTokenLeaks){
+                                if (threats.thirdPartyTokenLeaks) {
                                     blocking = true;
                                 }
-                                if (threats.CSRFAttack){
+                                if (threats.CSRFAttack) {
                                     blocking = true;
                                 }
                             }
-
-
                         }
                     },
                     { urls: ["<all_urls>"] },
                     ["blocking", "requestHeaders"]);
             }
+        } else {
+            // SSL protection
+            // var addSSL = sslProtect(details);
+            // if (addSSL) {
+            //     return addSSL;
+            // }
         }
         // return {cancel: true};
     },
@@ -85,42 +89,32 @@ chrome.webRequest.onBeforeSendHeaders.addListener(
         var url = details.url;
         var blocking = false;
         var oauth2Response = detectOAuth2Response(details);
-        if (oauth2Response){
+        if (oauth2Response) {
             var oauth2Request = localStorage.getItem(oauth2Response.RPDomain);
-            if(oauth2Request){
+            if (oauth2Request) {
                 oauth2Request = JSON.parse(oauth2Request).request;
                 var threats = detectOAuth2Threats(oauth2Request, oauth2Response);
                 // print threats to console
                 printThreats(threats);
-                if (threats.thirdPartyTokenLeaks){
+                if (threats.thirdPartyTokenLeaks) {
                     blocking = true;
                 }
-                if (threats.CSRFAttack){
+                if (threats.CSRFAttack) {
                     blocking = true;
                 }
-                if (threats.unsafeTransferTokens){
-                    url = url.replace("http:", "https:");
-                    console.log(url);
-                    return { redirectUrl: "http://www.wanpengli.com"};
-                }
-            }else{
+            } else {
                 var threats = detectOAuth2Threats(null, oauth2Response);
                 // print threats to console
                 printThreats(threats);
-                if (threats.thirdPartyTokenLeaks){
+                if (threats.thirdPartyTokenLeaks) {
                     blocking = true;
                 }
-                if (threats.CSRFAttack){
+                if (threats.CSRFAttack) {
                     blocking = true;
-                }
-                if (threats.unsafeTransferTokens){
-                    url = url.replace("http:", "https:");
-                    console.log(url);
-                    return { redirectUrl: "http://www.wanpengli.com"};
                 }
             }
         }
-        return {cancel:blocking};
+        return { cancel: blocking };
         // console.log(details);
         // var oauth2Vul = detectOauth2Vuls(details);
 
@@ -236,7 +230,7 @@ function detectOAuth2Response(details) {
             OAuth2Response.state = params.get("state");
             OAuth2Response.code = params.get("code");
 
-            // retrieve referer header
+            //retrieve referer header
             var headers = details.requestHeaders;
             // console.log(headers)
             var referer = "";
@@ -384,42 +378,142 @@ function detectOAuth2Threats(OAuthRequest, OAuthResponse) {
                 threats.thirdPartyTokenLeaks = true;
 
             }
-        }else{
+        } else {
             console.log('The OAuth2.0 response seems ok');
         }
     } else {
-        if (OAuthResponse.RPProtocol === 'http:'){
+        if (OAuthResponse.RPProtocol === 'http:') {
             threats.unsafeTransferTokens = true;
         }
         // referer header is compressed.
     }
     // Impersonation attacks threat detect
-    if (OAuthResponse.access_token && !OAuthResponse.code && !OAuthResponse.id_token){
+    if (OAuthResponse.access_token && !OAuthResponse.code && !OAuthResponse.id_token) {
         threats.impersonationAttack = true;
     }
 
-    if (!OAuthResponse.state && OAuthResponse.method !== 'POST'){
+    if (!OAuthResponse.state && OAuthResponse.method !== 'POST') {
         threats.CSRFAttackThreat = true;
     }
-    if (OAuthResponse.access_token || OAuthResponse.id_token){
+    if (OAuthResponse.access_token || OAuthResponse.id_token) {
         threats.flowMisuse = true;
     }
-
-
 
     return threats;
 }
 
 
+function sslProtect(details) {
+    var oauth2Response = detectGETSSL(details);
+    var url = details.url
+    if (oauth2Response) {
+        var oauth2Request = localStorage.getItem(oauth2Response.RPDomain);
+        if (oauth2Request) {
+            oauth2Request = JSON.parse(oauth2Request).request;
+            var threats = detectOAuth2Threats(oauth2Request, oauth2Response);
+            console.log('here')
+            // print threats to console
+            if (threats.unsafeTransferTokens) {
+                url = url.replace("http:", "https:")
+                return { redirectUrl: url }
+
+            }
+        } else {
+            var threats = detectOAuth2Threats(null, oauth2Response);
+            // print threats to console
+            if (threats.unsafeTransferTokens) {
+                url = url.replace("http:", "https:")
+                return { redirectUrl: url }
+            }
+        }
+    } else {
+        return null;
+    }
+}
 function printThreats(threats) {
     var threatNames = Object.keys(threats);
     var msg = ''
-    if (threatNames.length > 0){
+    if (threatNames.length > 0) {
         for (let i = 0; i < threatNames.length; i++) {
             const threatName = threatNames[i];
             msg += threatName + ';';
         }
         console.warn('threats detected: ' + msg);
+    }
+}
+
+
+function detectGETSSL(details) {
+    // OAuth 2.0 response Object
+    var OAuth2Response = {
+        IdP: '',
+        RPDomain: '',
+        RPHost: '',
+        RPProtocol: '',
+        method: '',
+        state: '',
+        code: '',
+        referer: '',
+        access_token: '',
+        id_token: '',
+        responseURL: '',
+        data: '',
+        cookie: ''
+    };
+    var url = details.url;
+    var response = new URL(url);
+    var RPHost = response.host;
+    var RPDomain = extractDomain(RPHost);
+    var RPProtocol = response.protocol;
+    var method = details.method;
+    // Initialize the response object;
+    OAuth2Response.RPDomain = RPDomain;
+    OAuth2Response.RPHost = RPHost;
+    OAuth2Response.RPProtocol = RPProtocol;
+    OAuth2Response.method = method;
+    OAuth2Response.responseURL = url;
+
+    // retrieve IdPs and ignore requests send to IdP domains
+    var IdPs = Object.keys(googleOAuth2RegsObject);
+    // add googleapis.com into whitelist
+    IdPs.push('googleapis.com');
+    if (customizedRegsObjects) {
+        var customizedIdPs = Object.keys(customizedRegsObjects);
+        IdPs = IdPs.concat(customizedIdPs);
+    }
+    // return 0 if the url is sending info to IdPs
+    if (IdPs.indexOf(extractDomain(RPHost)) >= 0) {
+        return null;
+    }
+    // detect OAuth 2.0 response for different methods.
+    if (method === 'GET') {
+        // get method.
+        // read customized regular expression.
+        var isGoogle;
+        if (customizedRegsObjects) {
+            isGoogle = isOAuth2Token(customizedRegsObjects, details.url) || isOAuth2Token(googleOAuth2RegsObject, details.url);
+        } else {
+            isGoogle = isOAuth2Token(googleOAuth2RegsObject, details.url);
+        }
+        // console.log(isGoogle);
+        if (isGoogle) {
+            var IdP = Object.keys(isGoogle)[0];
+            var tokens = isGoogle[IdP];
+            for (let i = 0; i < Object.keys(tokens).length; i++) {
+                const tokenName = Object.keys(tokens)[i];
+                const tokenValue = tokens[tokenName];
+                OAuth2Response[tokenName] = tokenValue;
+            }
+            OAuth2Response.IdP = IdP;
+            // retrieve paramters from get request
+            var params = new URLSearchParams(response.search);
+            OAuth2Response.state = params.get("state");
+            OAuth2Response.code = params.get("code");
+            return OAuth2Response;
+        } else {
+            // return null if it is not an OAuth2 response
+            return null;
+        }
     }
 }
 /*
