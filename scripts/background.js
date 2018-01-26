@@ -838,6 +838,7 @@ function storeOAuth2Response(oauth2response) {
             localStorage.setItem(RP, JSON.stringify(storedOAuth2Records));
         }
     }else{
+        // intentional privacy leakage .
         console.log("An privacy leakage detected!");
         var privacyRecords = localStorage.getItem('privacy');
         if (privacyRecords) {
