@@ -1,15 +1,54 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <title>IDST Information</title>
+    <title>OAuthGuard</title>
     <script src="/scripts/popup.js"></script>
     <link href="/contents/popup.css" rel="stylesheet" type="text/css">
 </head>
-<body>
-<button class="button" id="check-report"> Check Report</button>
-<br>
-<button class="button" id="export-data"> Export Data</button>
-<br>
-</body>
 
+<body>
+    <ul class="nav nav-tabs">
+        <li id="oauthguard-board" class="active"><a href="#guard-board" data-toggle="tab"><span>OAuthGuard</span></a></li>
+        <li id="oauthguard-warnings"><a href="#guard-warnings" data-toggle="tab"><span>Warnings</span></a></li>
+        <li id="oauthguard-tools"><a href="#guard-tools" data-toggle="tab"><span>Tools</span></a></li>
+    </ul>
+    <div class="tab-content">
+        <div id="guard-board" class="tab-pane active">
+            <ul class="list-unstyled">
+                <li><span id="csrf-attack">30</span></li>
+                <li><span>CSRF Attack Blocked</span></a></li>
+            </ul>
+            <ul class="list-unstyled">
+                <li><span id="referer-leak">40</span></li>
+                <li><span>Referer Token Leakage Blocked</span></a></li>
+            </ul>
+            <ul class="list-unstyled">
+                <li><span id="third-party-leak">0</span></li>
+                <li><span>Third Party Token Leakage Blocked</span></li>
+            </ul>
+            <ul class="list-unstyled">
+                <li><span id="https-upgrade">40</span></li>
+                <li><span>HTTPS Upgrades</span></li>
+            </ul>
+        </div>
+        <div id="guard-warnings" class="tab-pane inactive">
+            <span>We strongly recommend users should stop using Google sign-in in the following websites:</span><br>
+            <!-- <ul class="list-unstyled">
+                <li><span>a.com</span></li>
+                <li><span>b.com</span></li>
+                <li><span>c.com</span></li>
+            </ul> -->
+        </div>
+        <div id="guard-tools" class="tab-pane inactive">
+            <button class="button" id="check-report"> Check Report</button>
+            <button class="button" id="open-tools"> Open OAuth 2.0 tools</button>
+
+            <button class="button" id="export-data"> Export Data</button>
+            <button class="button" id="https-options"> Turn on HTTPS Upgrade</button>
+             <button class="button" id="vulnerabilities"> Vulnerability Description</button>
+            <br>
+        </div>
+    </div>
+</body>
 </html>

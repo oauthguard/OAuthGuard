@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>The Vulnerabilities that OAuthGuard can detect and protect.</title>
+    <link href="/contents/vulnerabilities.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+    <h1>Vulnerabilities OAuthGuard can Detect</h1>
+    <ol>
+        <li>
+            <p class="heading">CSRF attack.</p>
+            <p>CSRF attacks against the OAuth 2.0 redirect_uri can allow an attacker to obtain authorization to access OAuth- protected resources without the consent of the user. Such an attack is possible for both the Authorization Code Grant Flow and the Implicit Grant Flow.
+            An attacker first acquires a code, access token or id token relating to its own protected resources. The attacker then aborts the redirect flow back to the RP on the attacker's own device, and then, by some means, tricks the victim into executing the redirect back to the RP. The RP receives the redirect, fetches the attributes from the IdP, and associates the victim's RP session with the attacker's resources that are accessible using the tokens. The victim user then accesses resources on behalf of the attacker.</p>
+            <p>The impact of such an attack depends on the type of resource accessed. For example, the user might upload private data to the RP, thinking it is uploading information to its own profile at this RP, and this data will subsequently be available to the attacker; as described by Li and Mitchell [11], an attacker can use a CSRF attack to control a victim user's RP account without knowing the user's username and password. </p></li>
+        <li>
+            <p class="heading">Impersonation attack.</p>
+            <p>This vulnerability stems from confusion about authentication and authorization. In OAuth 2.0, an access token is intended for authorization purposes only because it is not tied to any specific RP. As the access token is a bearer token; that is, it can be used by any RP that gains access to it. If an RP only submits an access token to their Google sign-in endpoint, an attacker (malicious RP) can submit a victim user's access token issued to itself by the Google to the RP's Google sign-in endpoint. The RP then uses this access token to get the victim user's information from Google, the attacker then gets the full access of the victim user's account at the RP.</p>
+        </li>
+        <li>
+            <p class="heading">Authorization Flow Misuse.</p>
+            <p>OAuth 2.0 defined four authorization flows; OpenID Connect defined three authentication flows. It is upon to the RP developers to choose the right flow and implement their OAuth 2.0 or OpenID Connect flows correctly. According to the OAuth 2.0 and OpenID Connect standards, only a code should be submitted back to the RP's Google sign-in endpoint as evidence that the user has been authenticated. However, in real world, many RPs submit a combination of code, access token and id token back to their Google sign-in endpoint.</p>
+        </li>
+        <li>
+            <p class="heading">Unsafe Token Transfer.</p>
+            <p>The design goal of OAuth 2.0 and OpenID Connect is to allow an RP to access a user information stored at the IdP using an code, access token or id token without giving the user's IdP account name and passwords. These tokens are vital important and needs to be protected when transferring between the RP and Google (e.g. using HTTPS). However, many RPs are not using HTTPS to protect their Google sign-in.</p>
+        </li>
+        <li>
+            <p class="heading">Privacy Leakage. </p>
+            <p>When a user chooses to use Google log in to an RP website, the user's code, access token or id token that the RP retrieves from the Google should never be revealed to parties other than the RP. We consider two kinds of privacy leakages, intentional privacy leakage and referer (unintentional) privacy leakage. The difference between these two leakages is that whether the RP is aware of the leakage. The unintentional privacy leakage might happen when an RP includes third party contents in its Google sign-in endpoint; while the intentional privacy leakage occurs when an RP deliberately sends user tokens to third parties.</p>
+        </li>
+    </ol>
+    <h1>OAuthGuard can protect user's security and privacy against the following Vulnerabilities</h1>
+    <ol>
+        <li>
+            <p class="heading">CSRF Attack Protection. </p>
+            <p>OAuthGuard uses the CSRF countermeasures proposed by Li and Mitchell recently to protect user security against CSRF attacks when using Google sign-in. OAuthGuard first checks the referer header of the HTTP message of an OAuth 2.0 response; if the referer header does not points to Google's domain or the RP's domain; then OAuthGuard knows it is a CSRF attack against the RP's Google sign-in endpoint and notifies the user that it blocked a CSRF attack attempt. This technique works on most of the RPs, but there are a small number of RPs that are using a proxy service (e.g. gigya) to implement their Google sign-in, or using another do- main (not the domain it registered with Google) as their Google sign-in endpoint, we whitelisted these RPs' domain so that OAuthGuard will not block such OAuth 2.0 response.</p>
+        </li>
+        <li>
+            <p class="heading">Impersonation Attack Warning. </p>
+            <p>OAuthGuard is able to detect the RP's Google sign-in endpoint and extract all the three tokens from the HTTP message of an OAuth 2.0 Response. If only an access token is submitted to the PR's Google sign-in endpoint; OAuthGuard notifies the user that the RP's website are vulnerable to an impersonation attack and the users should stop using Google sign-in on that RP.</p>
+        </li>
+        <li>
+            <p class="heading">Unsafe Token Transfer Protection.</p>
+            <p>OAuthGuard is able to extract the protocol used to transfer an OAuth 2.0 response and when http is used, OAuthGuard tries to redirect the response using HTTPS before it leaves the user's browser. This only works when HTTPS is available on the RP.</p>
+        </li>
+        <li>
+            <p class="heading">Privacy Leakage Protection.</p>
+            <p> When any of the two privacy leakages is detected, OAuthGuard notifies the users that it blocked a privacy leakage attempt.</p>
+        </li>
+
+    </ol>
+
+</body>
+</html>
