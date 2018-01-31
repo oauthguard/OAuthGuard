@@ -610,7 +610,7 @@ function sslProtect(details) {
                 // do redirection
                 url = url.replace("http:", "https:");
                 storeCounter("HTTPSUpgrade");
-                console.log("OAuthGuard did HTTPs upgrade in :" + domain + "for the following OAuth 2.0 response:");
+                console.log("OAuthGuard did HTTPs upgrade in : " + domain + "for the following OAuth 2.0 response:");
                 return { redirectUrl: url };
 
             }
@@ -633,7 +633,7 @@ function sslProtect(details) {
                 // do redirection
                 url = url.replace("http:", "https:")
                 storeCounter("HTTPSUpgrade");
-                console.log("OAuthGuard did HTTPs upgrade in :" + domain + "for the following OAuth 2.0 response:");
+                console.log("OAuthGuard did HTTPs upgrade in : " + domain + "for the following OAuth 2.0 response:");
                 return { redirectUrl: url };
             }
         }
