@@ -475,8 +475,7 @@ function detectOAuth2Threats(OAuthRequest, OAuthResponse) {
                     }
                 }
             }else{
-                var responseURL = new URL(OAuthResponse.responseURL);
-                var responseDomain = extractDomain(responseURL.host);
+                var responseDomain = OAuthResponse.RPDomain;
                 var httpsRPUpgradeWhitelist = localStorage.getItem("httpsRPUpgradeWhitelist");
                 if (httpsRPUpgradeWhitelist) {
                     httpsRPUpgradeWhitelist = JSON.parse(httpsRPUpgradeWhitelist);
@@ -601,7 +600,9 @@ function sslProtect(details) {
                 var httpsRPUpgradeWhitelist = localStorage.getItem("httpsRPUpgradeWhitelist");
                 if (httpsRPUpgradeWhitelist) {
                     httpsRPUpgradeWhitelist = JSON.parse(httpsRPUpgradeWhitelist);
-                    httpsRPUpgradeWhitelist.push(domain)
+                    if(httpsRPUpgradeWhitelist.indexOf(domain) < 0){
+                        httpsRPUpgradeWhitelist.push(domain);
+                    }
                     localStorage.setItem("httpsRPUpgradeWhitelist", JSON.stringify(httpsRPUpgradeWhitelist));  
                 }else{
                     localStorage.setItem("httpsRPUpgradeWhitelist", JSON.stringify([domain]));
@@ -622,7 +623,9 @@ function sslProtect(details) {
                 var httpsRPUpgradeWhitelist = localStorage.getItem("httpsRPUpgradeWhitelist");
                 if (httpsRPUpgradeWhitelist) {
                     httpsRPUpgradeWhitelist = JSON.parse(httpsRPUpgradeWhitelist);
-                    httpsRPUpgradeWhitelist.push(domain)
+                    if(httpsRPUpgradeWhitelist.indexOf(domain) < 0){
+                        httpsRPUpgradeWhitelist.push(domain);
+                    }
                     localStorage.setItem("httpsRPUpgradeWhitelist", JSON.stringify(httpsRPUpgradeWhitelist));  
                 }else{
                     localStorage.setItem("httpsRPUpgradeWhitelist", JSON.stringify([domain]));
