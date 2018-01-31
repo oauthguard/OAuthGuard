@@ -10,8 +10,11 @@ const googleOAuth2RegsObject = {
 };
 
 // set up https-upgrade options
+var httpsOption = localStorage.getItem("https-options");
+if (!httpsOption) {
+    localStorage.setItem("https-options", 0);
+}
 
-localStorage.setItem("https-options", 0);
 
 // read user defined regular expressions
 const customizedRegsObjects = JSON.parse(localStorage.getItem('re_expressions'));
@@ -472,7 +475,18 @@ function detectOAuth2Threats(OAuthRequest, OAuthResponse) {
                     }
                 }
             }else{
-                threats.CSRFAttack = true;
+                var responseURL = new URL(OAuthResponse.responseURL);
+                var responseDomain = extractDomain(responseURL.host);
+                var httpsRPUpgradeWhitelist = localStorage.getItem("httpsRPUpgradeWhitelist");
+                if (httpsRPUpgradeWhitelist) {
+                    httpsRPUpgradeWhitelist = JSON.parse(httpsRPUpgradeWhitelist);
+                    if (httpsRPUpgradeWhitelist.indexOf(responseDomain) < 0) {
+                        threats.CSRFAttack = true;
+                    }
+                }else{
+                    threats.CSRFAttack = true;
+                }
+                
             }
         }
         // referer header is present in the response
@@ -581,8 +595,21 @@ function sslProtect(details) {
             var threats = detectOAuth2Threats(oauth2Request, oauth2Response);
             // print threats to console
             if (threats.unsafeTransferTokens) {
+                // whitelist domains using http
+                var host = new URL(url);
+                var domain = extractDomain(host.host);
+                var httpsRPUpgradeWhitelist = localStorage.getItem("httpsRPUpgradeWhitelist");
+                if (httpsRPUpgradeWhitelist) {
+                    httpsRPUpgradeWhitelist = JSON.parse(httpsRPUpgradeWhitelist);
+                    httpsRPUpgradeWhitelist.push(domain)
+                    localStorage.setItem("httpsRPUpgradeWhitelist", JSON.stringify(httpsRPUpgradeWhitelist));  
+                }else{
+                    localStorage.setItem("httpsRPUpgradeWhitelist", JSON.stringify([domain]));
+                }
+                // do redirection
                 url = url.replace("http:", "https:");
                 storeCounter("HTTPSUpgrade");
+                console.log("OAuthGuard did HTTPs upgrade in :" + domain + "for the following OAuth 2.0 response:");
                 return { redirectUrl: url };
 
             }
@@ -590,8 +617,20 @@ function sslProtect(details) {
             var threats = detectOAuth2Threats(null, oauth2Response);
             // print threats to console
             if (threats.unsafeTransferTokens) {
+                // whitelist domains using http
+                var domain = extractDomain(url);
+                var httpsRPUpgradeWhitelist = localStorage.getItem("httpsRPUpgradeWhitelist");
+                if (httpsRPUpgradeWhitelist) {
+                    httpsRPUpgradeWhitelist = JSON.parse(httpsRPUpgradeWhitelist);
+                    httpsRPUpgradeWhitelist.push(domain)
+                    localStorage.setItem("httpsRPUpgradeWhitelist", JSON.stringify(httpsRPUpgradeWhitelist));  
+                }else{
+                    localStorage.setItem("httpsRPUpgradeWhitelist", JSON.stringify([domain]));
+                }
+                // do redirection
                 url = url.replace("http:", "https:")
                 storeCounter("HTTPSUpgrade");
+                console.log("OAuthGuard did HTTPs upgrade in :" + domain + "for the following OAuth 2.0 response:");
                 return { redirectUrl: url };
             }
         }
