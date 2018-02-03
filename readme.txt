@@ -1,3 +1,7 @@
+OAuthGuard can be used to detect common vulnerabilities in Google sign in, 
+
+and protect user security and privacy when using Google sign in. 
+
 How to install OAuthGuard on Chrome.
 
 1. download latest Chrome web browser.
