@@ -610,7 +610,7 @@ function sslProtect(details) {
                 // do redirection
                 url = url.replace("http:", "https:");
                 storeCounter("HTTPSUpgrade");
-                console.log("OAuthGuard did HTTPs upgrade in : " + domain + "for the following OAuth 2.0 response:");
+                console.log("OAuthGuard did HTTPs upgrade in : " + domain + " for the following OAuth 2.0 response:");
                 return { redirectUrl: url };
 
             }
@@ -619,7 +619,8 @@ function sslProtect(details) {
             // print threats to console
             if (threats.unsafeTransferTokens) {
                 // whitelist domains using http
-                var domain = extractDomain(url);
+                var host = new URL(url);
+                var domain = extractDomain(host.host);
                 var httpsRPUpgradeWhitelist = localStorage.getItem("httpsRPUpgradeWhitelist");
                 if (httpsRPUpgradeWhitelist) {
                     httpsRPUpgradeWhitelist = JSON.parse(httpsRPUpgradeWhitelist);
@@ -633,7 +634,7 @@ function sslProtect(details) {
                 // do redirection
                 url = url.replace("http:", "https:")
                 storeCounter("HTTPSUpgrade");
-                console.log("OAuthGuard did HTTPs upgrade in : " + domain + "for the following OAuth 2.0 response:");
+                console.log("OAuthGuard did HTTPs upgrade in : " + domain + " for the following OAuth 2.0 response:");
                 return { redirectUrl: url };
             }
         }
@@ -825,8 +826,43 @@ function detectOAuth2(details) {
         OAuth2Request.responseType = params.get("response_type");
         console.log(OAuth2Request);
         return OAuth2Request;
-    } else {
+    } else if ((request.pathname.search(/oauth/i) >= 0) && (request.search.search(/origin/i) >= 0) && (request.search.search(/client_id/i) >= 0)) {
         // console.log("This is not an OAuth 2.0 Request!");
+        OAuth2Request.IdP = request.origin;
+        OAuth2Request.requestURL = request.href;
+        OAuth2Request.IdPProtocol = request.protocol;
+
+        var headers = details.requestHeaders;
+        var referer = "";
+        var cookie = "";
+        for (var i = 0; i < headers.length; i++) {
+            var header = headers[i];
+            if (header.name.toLowerCase() === "cookie") {
+                cookie = header["value"];
+            } else if (header.name.toLowerCase() === "referer") {
+                referer = header["value"];
+            }
+        }
+        OAuth2Request.referer = referer;
+
+        
+        var params = new URLSearchParams(request.search);
+        OAuth2Request.origin = params.get("origin");
+        OAuth2Request.clientID = params.get("client_id");
+        OAuth2Request.scope = params.get("scope");
+        OAuth2Request.redirectURI = "iframerpc";
+        OAuth2Request.state = params.get("state");
+        OAuth2Request.responseType = params.get("response_type") || params.get("action");
+
+        var RPUrl = new URL(params.get("origin"));
+        OAuth2Request.RP = RPUrl.host;
+        OAuth2Request.RPProtocol = RPUrl.protocol;
+        OAuth2Request.RPDomain = extractDomain(RPUrl.host);
+
+
+        console.log(OAuth2Request);
+        return OAuth2Request;
+    }else{
         return null;
     }
 }

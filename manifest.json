@@ -1,14 +1,9 @@
-/*
- * manifest.json for IDST (Identity Management Security Tester)
- * Registration manifest information for the IDT chrome extension.
- * Author : Wanpeng Li
- */
 {
     "manifest_version":2,
 
 
     "name":"OAuthGuard",
-    "version":"1.0.0",
+    "version":"1.0.1",
     "description": "An OAuth 2.0 and OpenID Connect Vulnerability Scanner",
 
     "browser_action": {
