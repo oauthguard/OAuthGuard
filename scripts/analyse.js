@@ -17,7 +17,7 @@ function checkRP() {
                 }
             }
 
-            var responseAttributes = Object.keys(response[1]);
+            var responseAttributes = Object.keys(response[0]);
             createTable('response');
             for (var i = 0; i < responseAttributes.length; i++) {
                 var attr = responseAttributes[i];

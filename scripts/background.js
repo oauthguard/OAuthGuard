@@ -456,7 +456,7 @@ function detectOAuth2Threats(OAuthRequest, OAuthResponse) {
                     if (responseRefererDomain !== OAuthResponse.RPDomain || responseRefererDomain !== OAuthResponse.IdP) {
                         // detect CSRF attacks
                         var redirect_uri = OAuthRequest.redirectURI;
-                        if (redirect_uri === 'postmessage') {
+                        if (redirect_uri === 'postmessage' || redirect_uri ==="iframerpc") {
                             // detect for RPs using the Google client library
                             var origin = OAuthRequest.origin;
                             if (origin.indexOf(responseRefererDomain) >= 0 || OAuthResponse.IdP.indexOf(responseRefererDomain) >= 0) {
