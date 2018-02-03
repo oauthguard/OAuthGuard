@@ -21,7 +21,7 @@ function checkRP() {
             createTable('response');
             for (var i = 0; i < responseAttributes.length; i++) {
                 var attr = responseAttributes[i];
-                var value = response[1][attr];
+                var value = response[0][attr];
                 if (value) {
                     insertToTable('response-table', attr, value);
                 }

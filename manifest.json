@@ -3,7 +3,7 @@
 
 
     "name":"OAuthGuard",
-    "version":"1.0.1",
+    "version":"1.0.2",
     "description": "An OAuth 2.0 and OpenID Connect Vulnerability Scanner",
 
     "browser_action": {
