@@ -100,7 +100,7 @@ chrome.webRequest.onBeforeRequest.addListener(
                         return { cancel: blocking };
                     },
                     { urls: ["<all_urls>"] },
-                    ["blocking", "requestHeaders"]);
+                    ["blocking", "requestHeaders", "extraHeaders"]);
             }
         } else {
             // // SSL protection
@@ -194,7 +194,7 @@ chrome.webRequest.onBeforeSendHeaders.addListener(
         // }
     },
     { urls: ["<all_urls>"] },
-    ["blocking", "requestHeaders"]);
+    ["blocking", "requestHeaders", "extraHeaders"]);
 /**
  * detect OAuth 2.0 response
  *
@@ -485,7 +485,7 @@ function detectOAuth2Threats(OAuthRequest, OAuthResponse) {
                 }else{
                     threats.CSRFAttack = true;
                 }
-                
+
             }
         }
         // referer header is present in the response
@@ -603,7 +603,7 @@ function sslProtect(details) {
                     if(httpsRPUpgradeWhitelist.indexOf(domain) < 0){
                         httpsRPUpgradeWhitelist.push(domain);
                     }
-                    localStorage.setItem("httpsRPUpgradeWhitelist", JSON.stringify(httpsRPUpgradeWhitelist));  
+                    localStorage.setItem("httpsRPUpgradeWhitelist", JSON.stringify(httpsRPUpgradeWhitelist));
                 }else{
                     localStorage.setItem("httpsRPUpgradeWhitelist", JSON.stringify([domain]));
                 }
@@ -627,7 +627,7 @@ function sslProtect(details) {
                     if(httpsRPUpgradeWhitelist.indexOf(domain) < 0){
                         httpsRPUpgradeWhitelist.push(domain);
                     }
-                    localStorage.setItem("httpsRPUpgradeWhitelist", JSON.stringify(httpsRPUpgradeWhitelist));  
+                    localStorage.setItem("httpsRPUpgradeWhitelist", JSON.stringify(httpsRPUpgradeWhitelist));
                 }else{
                     localStorage.setItem("httpsRPUpgradeWhitelist", JSON.stringify([domain]));
                 }
@@ -845,7 +845,7 @@ function detectOAuth2(details) {
         }
         OAuth2Request.referer = referer;
 
-        
+
         var params = new URLSearchParams(request.search);
         OAuth2Request.origin = params.get("origin");
         OAuth2Request.clientID = params.get("client_id");
